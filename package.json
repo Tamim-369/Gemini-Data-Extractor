@@ -1,0 +1,31 @@
+{
+  "name": "project1",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "ts-node index.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@langchain/google-genai": "^0.1.6",
+    "@types/html-to-text": "^9.0.4",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "html-to-text": "^9.0.5",
+    "inquirer": "^12.3.0",
+    "langchain": "^0.3.9",
+    "puppeteer": "^23.11.1"
+  },
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT"
+}
