@@ -2,19 +2,38 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import fs from "fs/promises";
 import inquirer from "inquirer";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { convert } from "html-to-text";
 async function takeHTML(url: string) {
-  const browser = await puppeteer.launch();
+  puppeteer.use(StealthPlugin());
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
-  await page.goto(url);
-  const html = await page.evaluate(() => document.documentElement.outerHTML);
+  await page.goto(url, { waitUntil: "networkidle2" });
+
+  // Randomly move the mouse to make it more human-like
+  await page.mouse.move(
+    Math.floor(Math.random() * 1000),
+    Math.floor(Math.random() * 1000)
+  );
+
+  // Scroll a little bit
+  await page.evaluate(() => {
+    window.scrollBy(0, window.innerHeight / 2);
+  });
+
+  // Wait for a random time between 1 to 10 seconds
+  page.setDefaultTimeout(Math.floor(Math.random() * 9000) + 1000);
+
+  const html = await page.content();
+  fs.writeFile("output.html", html);
   await browser.close();
   return html.toString();
 }
-async function htmlToText(html: string) {
-  return convert(html);
-}
+
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
@@ -37,8 +56,7 @@ const url = await inquirer.prompt({
   message: "Enter the URL of the website you want to scrape",
 });
 const htmlFile = await takeHTML(url.url);
-const text = await htmlToText(htmlFile);
-const result = await model.generateContent([prompt, text]);
+const result = await model.generateContent([prompt, htmlFile]);
 const refinedResult = JSON.stringify(
   JSON.parse(result.response.text().replace(/```|json/g, "")),
   null,
