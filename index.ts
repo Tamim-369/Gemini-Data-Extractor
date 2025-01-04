@@ -5,34 +5,7 @@ import inquirer from "inquirer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { convert } from "html-to-text";
-async function takeHTML(url: string) {
-  puppeteer.use(StealthPlugin());
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "networkidle2" });
-
-  // Randomly move the mouse to make it more human-like
-  await page.mouse.move(
-    Math.floor(Math.random() * 1000),
-    Math.floor(Math.random() * 1000)
-  );
-
-  // Scroll a little bit
-  await page.evaluate(() => {
-    window.scrollBy(0, window.innerHeight / 2);
-  });
-
-  // Wait for a random time between 1 to 10 seconds
-  page.setDefaultTimeout(Math.floor(Math.random() * 9000) + 1000);
-
-  const html = await page.content();
-  fs.writeFile("output.html", html);
-  await browser.close();
-  return html.toString();
-}
+import { takeHTML } from "./utils/takeHtml";
 
 dotenv.config();
 
