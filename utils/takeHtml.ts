@@ -77,6 +77,24 @@ async function takeHTML(url: string): Promise<string> {
       timeout: 100000,
     });
 
+    // Scroll for 10 seconds
+    await page.evaluate(() => {
+      let lastScroll = 0;
+      const scrollInterval = setInterval(() => {
+        const scrollPosition = window.scrollY;
+        if (scrollPosition === lastScroll) {
+          clearInterval(scrollInterval);
+        } else {
+          lastScroll = scrollPosition;
+          window.scrollTo({
+            top: scrollPosition + Math.random() * (window.innerHeight / 2),
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+      setTimeout(() => clearInterval(scrollInterval), 10000);
+    });
+
     await humanLikeInteraction(page);
 
     const html = await page.content();
