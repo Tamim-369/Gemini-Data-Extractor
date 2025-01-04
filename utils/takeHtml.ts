@@ -73,7 +73,7 @@ async function takeHTML(url: string): Promise<string> {
     });
 
     await page.goto(url, {
-      waitUntil: "networkidle0",
+      // waitUntil: "networkidle0",
       timeout: 100000,
     });
 
