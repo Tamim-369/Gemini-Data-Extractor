@@ -72,10 +72,24 @@ async function takeHTML(url: string): Promise<string> {
       });
     });
 
-    await page.goto(url, {
-      // waitUntil: "networkidle0",
-      timeout: 100000,
-    });
+    // Implement a retry mechanism to handle navigation timeouts
+    let attempts = 3;
+    while (attempts > 0) {
+      try {
+        await page.goto(url, {
+          waitUntil: "domcontentloaded",
+          timeout: 60000,
+        });
+        break; // Exit loop if navigation succeeds
+      } catch (error) {
+        console.warn("Navigation attempt failed, retrying...", error);
+        attempts--;
+        if (attempts === 0) {
+          throw new Error("Navigation failed after multiple attempts");
+        }
+        await sleep(2000); // Wait before retrying
+      }
+    }
 
     // Scroll for 10 seconds
     await page.evaluate(() => {
