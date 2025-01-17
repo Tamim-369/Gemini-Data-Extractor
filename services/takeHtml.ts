@@ -72,7 +72,6 @@ async function takeHTML(url: string): Promise<string> {
       });
     });
 
-    // Implement a retry mechanism to handle navigation timeouts
     let attempts = 3;
     while (attempts > 0) {
       try {
@@ -80,14 +79,14 @@ async function takeHTML(url: string): Promise<string> {
           waitUntil: "domcontentloaded",
           timeout: 60000,
         });
-        break; // Exit loop if navigation succeeds
+        break;
       } catch (error) {
         console.warn("Navigation attempt failed, retrying...", error);
         attempts--;
         if (attempts === 0) {
           throw new Error("Navigation failed after multiple attempts");
         }
-        await sleep(2000); // Wait before retrying
+        await sleep(2000);
       }
     }
 
@@ -124,10 +123,8 @@ async function takeHTML(url: string): Promise<string> {
 }
 
 async function humanLikeInteraction(page: Page): Promise<void> {
-  // Initial random pause
   await sleep(Math.random() * 2000 + 1000);
 
-  // Multiple random scrolls
   for (let i = 0; i < 3; i++) {
     await page.evaluate(() => {
       window.scrollTo({
@@ -136,11 +133,9 @@ async function humanLikeInteraction(page: Page): Promise<void> {
       });
     });
 
-    // Random pause between scrolls
     await sleep(Math.random() * 1000 + 500);
   }
 
-  // Random mouse movements
   for (let i = 0; i < 3; i++) {
     await page.mouse.move(Math.random() * 800, Math.random() * 600, {
       steps: Math.floor(Math.random() * 10) + 5,
@@ -149,7 +144,6 @@ async function humanLikeInteraction(page: Page): Promise<void> {
     await sleep(Math.random() * 500 + 200);
   }
 
-  // Final wait
   await sleep(Math.random() * 2000 + 1000);
 }
 

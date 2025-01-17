@@ -9,24 +9,17 @@ import { takeHTML } from "./takeHtml";
 import { prompt } from "./prompt";
 
 dotenv.config();
-export const getProductData = async () => {
+export const getProductData = async (url: string) => {
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  //   await takeScreenshot(prompt.url, "screenshot.png");
-  //   const image = {
-  //     inlineData: {
-  //       data: await fs.readFile("screenshot.png", { encoding: "base64" }),
-  //       mimeType: "image/png",
-  //     },
-  //   };
-  const url = await inquirer.prompt({
-    type: "input",
-    name: "url",
-    message: "Enter the URL of the website you want to scrape",
-  });
-  const htmlFile = await takeHTML(url.url);
+  //   const url = await inquirer.prompt({
+  //     type: "input",
+  //     name: "url",
+  //     message: "Enter the URL of the website you want to scrape",
+  //   });
+  const htmlFile = await takeHTML(url);
   if (htmlFile === "" || htmlFile === null || htmlFile === undefined) {
     return {
       error: "failed to take html",
@@ -45,5 +38,6 @@ export const getProductData = async () => {
     null,
     2
   );
-  return refinedResult;
+  const parsedJson = await JSON.parse(refinedResult);
+  return parsedJson;
 };

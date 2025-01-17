@@ -1,54 +1,44 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import mongoose from "mongoose";
+import { ProductModel, type IProduct } from "./models/productModel";
+import { getProductData } from "./services/getProductData";
+import cron from "node-cron";
 import dotenv from "dotenv";
-import fs from "fs/promises";
-import inquirer from "inquirer";
-import puppeteer from "puppeteer-extra";
-import StealthPlugin from "puppeteer-extra-plugin-stealth";
-import { convert, htmlToText } from "html-to-text";
-import { takeHTML } from "./services/takeHtml";
-import { prompt } from "./services/prompt";
-
 dotenv.config();
-export const getProductData = async () => {
-  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
-
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-  //   await takeScreenshot(prompt.url, "screenshot.png");
-  //   const image = {
-  //     inlineData: {
-  //       data: await fs.readFile("screenshot.png", { encoding: "base64" }),
-  //       mimeType: "image/png",
-  //     },
-  //   };
-  const url = await inquirer.prompt({
-    type: "input",
-    name: "url",
-    message: "Enter the URL of the website you want to scrape",
+// we can use node cron to run this continuesly
+// cron.schedule("0 0 */12 * * *",);
+const productDataJob = async () => {
+  const allProducts = await ProductModel.find();
+  const uniqueProducts = new Map<string, any>();
+  await mongoose.connect(process.env.MONGODB_URI!);
+  allProducts.forEach((product: IProduct) => {
+    const key = `${product.name}-${product.price}`;
+    if (
+      !uniqueProducts.has(key) ||
+      new Date(product.createdAt) > new Date(uniqueProducts.get(key).createdAt)
+    ) {
+      uniqueProducts.set(key, product);
+    }
   });
-  const htmlFile = await takeHTML(url.url);
-  if (htmlFile === "" || htmlFile === null || htmlFile === undefined) {
-    return {
-      error: "failed to take html",
-    };
-  }
-  const text = await htmlToText(htmlFile);
-  fs.writeFile("output.txt", text);
-  let result: any = await model.generateContent([prompt, text]);
-  const jsonData = JSON.stringify(result);
-  if (jsonData.includes("MAX_TOKENS") || jsonData.includes("parts")) {
-    result = JSON.parse(jsonData).response.candidates[0].content.parts[0].text;
-  } else {
-    result = result.response.text;
-  }
-  fs.writeFile("output2.txt", result);
-  const refinedResult = JSON.stringify(
-    await JSON.parse(result.toString().replace(/```|json/g, "")),
-    null,
-    2
-  );
-  fs.writeFile("output.json", refinedResult);
-  return refinedResult;
-};
 
-getProductData();
+  const latestProducts = Array.from(uniqueProducts.values());
+  console.log(latestProducts);
+  await Promise.all([
+    latestProducts.map(async (product: IProduct) => {
+      const products: IProduct[] = await getProductData(product?.link);
+      const selectedProduct: IProduct = products[0];
+      const createdProduct = await ProductModel.create({
+        ...selectedProduct,
+        link: product.link,
+      });
+      if (!createdProduct) {
+        console.log("Failed to add product data");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 60000));
+    }),
+  ]);
+  return {
+    success: true,
+    message: "Successfully mined data",
+  };
+};
+productDataJob();

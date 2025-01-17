@@ -18,7 +18,7 @@ Rules:
 - Set link to null if URL is malformed or too long and the link should not be more then 300 charecters
 - Ensure all prices are numerical values
 - Return an empty array [] if no valid products found
-- do not give more then 15 product data
+- do not give more then 1 product data and you should always give the first product data you find and you should put that product data object in an array 
 - do not return any incomplete data you better give less data then give incomplete data the data should always look like the example response
 Example valid response:
 [
