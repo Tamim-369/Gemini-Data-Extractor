@@ -22,6 +22,6 @@ if (allProduct.length === 0) {
     link: url,
   });
 }
-cron.schedule("* * * * * *", async () => {
+cron.schedule("*/1 * * * *", async () => {
   await productDataJob();
 });
