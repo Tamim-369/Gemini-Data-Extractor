@@ -8,6 +8,12 @@ dotenv.config();
 // cron.schedule("0 0 */12 * * *",);
 const productDataJob = async () => {
   const allProducts = await ProductModel.find();
+  if (!allProducts.length) {
+    return {
+      success: false,
+      message: "No product data found",
+    };
+  }
   const uniqueProducts = new Map<string, any>();
   await mongoose.connect(process.env.MONGODB_URI!);
   allProducts.forEach((product: IProduct) => {
