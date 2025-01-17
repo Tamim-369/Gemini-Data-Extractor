@@ -5,8 +5,8 @@ import inquirer from "inquirer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { convert, htmlToText } from "html-to-text";
-import { takeHTML } from "./utils/takeHtml";
-import { prompt } from "./utils/prompt";
+import { takeHTML } from "./services/takeHtml";
+import { prompt } from "./services/prompt";
 
 dotenv.config();
 export const getProductData = async () => {
