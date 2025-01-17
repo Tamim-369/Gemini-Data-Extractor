@@ -5,8 +5,7 @@ import cron from "node-cron";
 import dotenv from "dotenv";
 import { sendEmail } from "../sendEmail";
 dotenv.config();
-// we can use node cron to run this continuesly
-// cron.schedule("0 0 */12 * * *",);
+
 export const productDataJob = async () => {
   const allProducts = await ProductModel.find().sort({ createdAt: -1 });
 
