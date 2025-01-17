@@ -8,7 +8,8 @@ dotenv.config();
 // we can use node cron to run this continuesly
 // cron.schedule("0 0 */12 * * *",);
 export const productDataJob = async () => {
-  const allProducts = await ProductModel.find();
+  const allProducts = await ProductModel.find().sort({ createdAt: -1 });
+
   console.log(allProducts);
   if (!allProducts) {
     return {
